@@ -12,10 +12,10 @@ void sighandler(int signo)
 	int status;
 	pid_t org_pid=getpid();
 	pid_t pid;
-	snprintf(buf,sizeof(buf),"attach %d",org_pid);
+	snprintf(buf,sizeof(buf),"%d",org_pid);
 	pid=fork();
 	if(pid==0) {
-		if(execl("/usr/bin/gdb","gdb","-ex",buf,NULL)==-1) {
+		if(execl("/usr/bin/gdb","gdb","--batch","--ex","bt f","--pid",buf,NULL)==-1) {
 			perror("Error: could not execute gdb");
 		}
 		goto out;
