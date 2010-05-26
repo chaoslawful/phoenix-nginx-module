@@ -6,6 +6,9 @@ crash: crash.c
 libjit_dbg.so: jit_dbg.c
 	gcc -fPIC -shared $^ -o $@
 
+test: libjit_dbg.so crash
+	LD_PRELOAD=./libjit_dbg.so ./crash
+
 clean:
 	rm -f crash libjit_dbg.so
 
