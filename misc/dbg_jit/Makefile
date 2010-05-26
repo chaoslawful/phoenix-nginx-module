@@ -10,7 +10,7 @@ test: libjit_dbg.so crash
 	LD_PRELOAD=./libjit_dbg.so ./crash
 
 clean:
-	rm -f crash libjit_dbg.so
+	rm -f crash libjit_dbg.so *.log
 
 .PHONY: all clean
 
