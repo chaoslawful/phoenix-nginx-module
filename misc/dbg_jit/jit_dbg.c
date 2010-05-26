@@ -17,27 +17,29 @@ void sighandler(int signo)
 {
 	char *val;
 	char gdb_path[255];
-	char out_file[255];
+	char set_logging_file[255];
 	char buf[255];
 	int status;
 	pid_t pid;
 
 	snprintf(gdb_path, sizeof(gdb_path), "%s",
 			 (val = getenv(ENV_GDB_PATH)) ? val : DEFAULT_GDB_PATH);
-	snprintf(out_file, sizeof(out_file), "set logging file %s",
-			 (val = getenv(ENV_OUT_FILE)) ? val : DEFAULT_OUT_FILE);
+	snprintf(set_logging_file, sizeof(set_logging_file),
+			 "set logging file %s", (val =
+									 getenv(ENV_OUT_FILE)) ? val :
+			 DEFAULT_OUT_FILE);
 	snprintf(buf, sizeof(buf), "%d", getpid());
 
 	pid = fork();
 	if (pid == 0) {
 		if (execl
-				(gdb_path, gdb_path, "--batch",
-				 "-ex", out_file,
-				 "-ex", "set logging redirect on",
-				 "-ex", "set logging on",
-				 "-ex", "info proc",
-				 "-ex", "bt f",
-				 "--pid", buf, NULL) == -1) {
+			(gdb_path, gdb_path,
+			 "--batch",
+			 "-ex", set_logging_file,
+			 "-ex", "set logging redirect on",
+			 "-ex", "set logging on",
+			 "-ex", "info proc", "-ex", "bt f", "--pid", buf, NULL) == -1)
+		{
 			perror("Error: could not execute gdb");
 		}
 		goto out;
@@ -66,4 +68,3 @@ void ctor()
 		perror("Could not set signal handler");
 	}
 }
-
