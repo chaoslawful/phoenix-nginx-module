@@ -7,7 +7,7 @@ crash: crash.c
 	gcc -g3 -O0 $^ -o$@
 
 libjit_dbg.so: jit_dbg.c
-	gcc -fPIC -shared $^ -o $@
+	gcc -g3 -O0 -fPIC -shared $^ -o $@
 
 test: libjit_dbg.so crash
 	LD_PRELOAD=./libjit_dbg.so ./crash
