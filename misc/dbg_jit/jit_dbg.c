@@ -36,6 +36,8 @@ void sighandler(int signo)
 		char* argv[] = {
 			gdb_path,
 			"--batch",
+                        "-ex", "set width 0",
+                        "-ex", "set pagination off",
 			"-ex", set_logging_file,
 			"-ex", "set logging redirect on",
 			"-ex", "set logging on",
