@@ -8,8 +8,12 @@
 #include <unistd.h>
 #include <spawn.h>
 
+#ifndef DEFAULT_GDB_PATH
 #define DEFAULT_GDB_PATH "/usr/bin/gdb"
+#endif
+#ifndef DEFAULT_OUT_FILE
 #define DEFAULT_OUT_FILE "./jit_dbg.log"
+#endif
 
 #define ENV_GDB_PATH "JITDBG_GDB_PATH"
 #define ENV_OUT_FILE "JITDBG_OUT_FILE"
