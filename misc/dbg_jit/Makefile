@@ -1,6 +1,9 @@
+gdb_path=/usr/bin/gdb
+outfile_path=/tmp/jitdbg.log
+
 version=0.0.1
 package=phoenix-utils-$(version)
-defs=-DDEFAULT_GDB_PATH='"/usr/bin/gdb"' -DDEFAULT_OUT_FILE='"/tmp/crashes.log"'
+defs=-DDEFAULT_GDB_PATH='"$(gdb_path)"' -DDEFAULT_OUT_FILE='"$(outfile_path)"'
 
 all: crash libjit_dbg.so
 
