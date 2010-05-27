@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <spawn.h>
 
 #define DEFAULT_GDB_PATH "/usr/bin/gdb"
 #define DEFAULT_OUT_FILE "./jit_dbg.log"
@@ -22,33 +23,42 @@ void sighandler(int signo)
 	int status;
 	pid_t pid;
 
-	snprintf(gdb_path, sizeof(gdb_path), "%s",
-			 (val = getenv(ENV_GDB_PATH)) ? val : DEFAULT_GDB_PATH);
+	snprintf(gdb_path, sizeof(gdb_path),
+			"%s",
+			(val = getenv(ENV_GDB_PATH)) ? val : DEFAULT_GDB_PATH);
 	snprintf(set_logging_file, sizeof(set_logging_file),
-			 "set logging file %s", (val =
-									 getenv(ENV_OUT_FILE)) ? val :
-			 DEFAULT_OUT_FILE);
+			"set logging file %s",
+			(val = getenv(ENV_OUT_FILE)) ? val : DEFAULT_OUT_FILE);
 	snprintf(buf, sizeof(buf), "%d", getpid());
 
-	pid = fork();
-	if (pid == 0) {
-		if (execl
-			(gdb_path, gdb_path,
-			 "--batch",
-			 "-ex", set_logging_file,
-			 "-ex", "set logging redirect on",
-			 "-ex", "set logging on",
-			 "-ex", "info proc", "-ex", "bt f", "--pid", buf, NULL) == -1)
-		{
-			perror("Error: could not execute gdb");
+	// spawn a individual gdb process and dumping backtrace of this process
+	{
+		char* argv[] = {
+			gdb_path,
+			"--batch",
+			"-ex", set_logging_file,
+			"-ex", "set logging redirect on",
+			"-ex", "set logging on",
+			"-ex", "info proc",
+			"-ex", "bt f",
+			"--pid", buf
+		};
+		char* envp[] = {
+			NULL
+		};
+
+		if (posix_spawn(&pid, gdb_path, NULL, NULL, argv, envp) < 0) {
+			perror("Error: could not spawn gdb");
+			goto out;
 		}
+	}
+
+	if (waitpid(pid, &status, 0) < 0) {
+		perror("waitpid on gdb");
 		goto out;
 	}
-	if (wait(&status) < 0) {
-		perror("wait on gdb");
-		goto out;
-	}
-  out:
+
+out:
 	// raise the signal again to crash process
 	raise(signo);
 }
@@ -68,3 +78,4 @@ void ctor()
 		perror("Could not set signal handler");
 	}
 }
+
